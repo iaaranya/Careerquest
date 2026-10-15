@@ -1,0 +1,571 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Quiz — CareerQuest</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .quiz-page {
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 65px 24px 100px;
+    }
+
+    .quiz-heading {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .quiz-heading h1 {
+      font: 700 clamp(34px, 5vw, 50px)/1.15 'Space Grotesk', sans-serif;
+      letter-spacing: -1.5px;
+      margin: 16px 0;
+    }
+
+    .quiz-heading p {
+      color: var(--muted);
+    }
+
+    .progress-track {
+      height: 6px;
+      margin: 25px 0 12px;
+      background: var(--surface-light);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 25%;
+      background: linear-gradient(90deg, #8d78f9, #71c9ed);
+      border-radius: 20px;
+      transition: width .3s;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .quiz-card {
+      margin-top: 30px;
+      padding: clamp(22px, 5vw, 38px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: linear-gradient(145deg, #171925, #11121c);
+    }
+
+    .question-number {
+      color: #b9aaff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+
+    .quiz-card h2 {
+      font: 600 clamp(23px, 4vw, 30px) 'Space Grotesk', sans-serif;
+      margin: 12px 0 8px;
+    }
+
+    .question-hint {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 70px;
+      padding: 15px;
+      color: var(--text);
+      text-align: left;
+      background: #191b29;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: .2s;
+    }
+
+    .option:hover {
+      border-color: #9b87ff;
+      transform: translateY(-2px);
+    }
+
+    .option.selected {
+      background: rgba(139,119,249,.14);
+      border-color: #9b87ff;
+    }
+
+    .option-symbol {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      background: #292442;
+      font-size: 19px;
+    }
+
+    .option-text {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .quiz-controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .back-button {
+      padding: 12px 20px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: transparent;
+      color: white;
+    }
+
+    .back-button:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    .quiz-error {
+      color: #ff9eae;
+      font-size: 13px;
+      margin-top: 14px;
+    }
+
+    .result-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    .result-item {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: #191b29;
+    }
+
+    .result-item h3 {
+      margin-bottom: 5px;
+    }
+
+    .result-item p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .match-label {
+      color: #b9aaff;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 540px) {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quiz-page {
+        padding-top: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">C</span>
+      CareerQuest<span class="dot">.</span>
+    </a>
+    <a href="index.html" class="secondary-button">← Back home</a>
+  </header>
+
+  <main class="quiz-page">
+    <div class="quiz-heading">
+      <span class="eyebrow">YOUR PERSONAL CAREER EXPLORER</span>
+      <h1>Let's discover <span class="gradient-text">your path.</span></h1>
+      <p>Choose what feels right for you. There are no wrong answers.</p>
+    </div>
+
+    <div id="quizArea">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div class="progress-label">
+        <span id="progressText">Question 1 of 4</span>
+        <span>Take your time</span>
+      </div>
+
+      <section class="quiz-card">
+        <div class="question-number" id="questionNumber">QUESTION 01</div>
+        <h2 id="questionTitle"></h2>
+        <p class="question-hint" id="questionHint"></p>
+        <div class="options-grid" id="optionsGrid"></div>
+        <p class="quiz-error hidden" id="quizError" role="alert"></p>
+
+        <div class="quiz-controls">
+          <button class="back-button" id="backButton">← Back</button>
+          <button class="primary-button" id="nextButton">Continue →</button>
+        </div>
+      </section>
+    </div>
+
+    <section class="quiz-card hidden" id="resultsArea">
+      <span class="eyebrow">YOUR RESULTS</span>
+      <h2>Explore your possibilities.</h2>
+      <p class="question-hint">
+        These are starting points based on your answers, not fixed predictions
+        about your future.
+      </p>
+      <div class="result-list" id="resultList"></div>
+      <div class="quiz-controls">
+        <button class="back-button" id="restartButton">Start again</button>
+        <a href="index.html" class="primary-button">Back home →</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  
+const questions = [
+  {
+    title: "What do you enjoy doing most?",
+    hint: "Choose the activity you like most.",
+    options: [
+      { text: "Solving difficult problems", icon: "🧩", field: "technology" },
+      { text: "Making art or stories", icon: "🎨", field: "creative" },
+      { text: "Discovering how things work", icon: "🔬", field: "science" },
+      { text: "Leading and organising", icon: "🚀", field: "business" }
+    ]
+  },
+  {
+    title: "Which subject interests you most?",
+    hint: "Think about what you enjoy learning.",
+    options: [
+      { text: "Maths and computers", icon: "💻", field: "technology" },
+      { text: "Art and languages", icon: "✍️", field: "creative" },
+      { text: "Science and nature", icon: "🌍", field: "science" },
+      { text: "Economics and business", icon: "📈", field: "business" }
+    ]
+  },
+  {
+    title: "What is one of your strengths?",
+    hint: "Choose what sounds most like you.",
+    options: [
+      { text: "Logical thinking", icon: "🧠", field: "technology" },
+      { text: "Imagination", icon: "💡", field: "creative" },
+      { text: "Curiosity", icon: "🔎", field: "science" },
+      { text: "Communication", icon: "🤝", field: "business" }
+    ]
+  },
+  {
+    title: "What would you like your work to involve?",
+    hint: "Imagine your future working day.",
+    options: [
+      { text: "Building useful technology", icon: "⚙️", field: "technology" },
+      { text: "Creating things people love", icon: "🎮", field: "creative" },
+      { text: "Making discoveries", icon: "🧪", field: "science" },
+      { text: "Building a team or business", icon: "🌟", field: "business" }
+    ]
+  },
+  {
+    title: "Which challenge sounds exciting?",
+    hint: "Choose the problem you would like to solve.",
+    options: [
+      { text: "Fixing a computer problem", icon: "💻", field: "technology" },
+      { text: "Designing a cool game character", icon: "🖌️", field: "creative" },
+      { text: "Finding out why something happens", icon: "🔍", field: "science" },
+      { text: "Helping a team reach a goal", icon: "🎯", field: "business" }
+    ]
+  },
+  {
+    title: "How do you like to express ideas?",
+    hint: "Pick the method you enjoy most.",
+    options: [
+      { text: "Code or technical plans", icon: "⌨️", field: "technology" },
+      { text: "Pictures, music or stories", icon: "🎭", field: "creative" },
+      { text: "Experiments and evidence", icon: "🧫", field: "science" },
+      { text: "Presentations and discussions", icon: "🎤", field: "business" }
+    ]
+  },
+  {
+    title: "Which project would you choose?",
+    hint: "Imagine you have a free weekend.",
+    options: [
+      { text: "Build a simple app", icon: "📱", field: "technology" },
+      { text: "Create a short animation", icon: "🎬", field: "creative" },
+      { text: "Try a science experiment", icon: "🧪", field: "science" },
+      { text: "Plan a small business", icon: "💼", field: "business" }
+    ]
+  },
+  {
+    title: "What kind of questions make you curious?",
+    hint: "Choose what you often wonder about.",
+    options: [
+      { text: "How do computers think?", icon: "🤖", field: "technology" },
+      { text: "How can I make something beautiful?", icon: "🎨", field: "creative" },
+      { text: "How does the natural world work?", icon: "🌱", field: "science" },
+      { text: "Why do some businesses succeed?", icon: "📊", field: "business" }
+    ]
+  },
+  {
+    title: "Where would you prefer to work?",
+    hint: "There is no wrong answer.",
+    options: [
+      { text: "A technology lab or coding desk", icon: "🖥️", field: "technology" },
+      { text: "A creative studio", icon: "🎨", field: "creative" },
+      { text: "A research lab or outdoors", icon: "🌿", field: "science" },
+      { text: "An office with a team", icon: "🏢", field: "business" }
+    ]
+  },
+  {
+    title: "What motivates you most?",
+    hint: "Think about what makes a task rewarding.",
+    options: [
+      { text: "Making something work better", icon: "⚙️", field: "technology" },
+      { text: "Making something original", icon: "✨", field: "creative" },
+      { text: "Learning something new", icon: "📚", field: "science" },
+      { text: "Achieving a shared goal", icon: "🏆", field: "business" }
+    ]
+  },
+  {
+    title: "Which skill would you most like to learn?",
+    hint: "Choose a skill you would enjoy practising.",
+    options: [
+      { text: "Programming", icon: "💻", field: "technology" },
+      { text: "Animation or design", icon: "🖍️", field: "creative" },
+      { text: "Research and experimentation", icon: "🔬", field: "science" },
+      { text: "Leadership and planning", icon: "🗂️", field: "business" }
+    ]
+  },
+  {
+    title: "How do you approach a difficult task?",
+    hint: "Choose the approach that feels most natural.",
+    options: [
+      { text: "Break it into logical steps", icon: "🧩", field: "technology" },
+      { text: "Try a creative approach", icon: "💡", field: "creative" },
+      { text: "Investigate and test ideas", icon: "🔎", field: "science" },
+      { text: "Ask people and organise a plan", icon: "🤝", field: "business" }
+    ]
+  },
+  {
+    title: "Which result would make you proud?",
+    hint: "Imagine finishing a big project.",
+    options: [
+      { text: "A tool that solves a real problem", icon: "🛠️", field: "technology" },
+      { text: "A game, film or artwork", icon: "🎮", field: "creative" },
+      { text: "A discovery backed by evidence", icon: "🔬", field: "science" },
+      { text: "A successful project or company", icon: "📈", field: "business" }
+    ]
+  },
+  {
+    title: "What role do you enjoy in a group?",
+    hint: "Think about how you like to contribute.",
+    options: [
+      { text: "Solving the technical problems", icon: "💻", field: "technology" },
+      { text: "Coming up with new ideas", icon: "🎨", field: "creative" },
+      { text: "Checking facts and testing ideas", icon: "🧪", field: "science" },
+      { text: "Organising people and tasks", icon: "📋", field: "business" }
+    ]
+  },
+  {
+    title: "Which future sounds most exciting?",
+    hint: "Choose the path you would like to explore first.",
+    options: [
+      { text: "Creating software or games", icon: "🕹️", field: "technology" },
+      { text: "Designing art, films or animations", icon: "🎬", field: "creative" },
+      { text: "Exploring science or engineering", icon: "🚀", field: "science" },
+      { text: "Running projects or a business", icon: "🌟", field: "business" }
+    ]
+  }
+];
+
+    const careers = {
+      technology: {
+        name: "Technology & Computing",
+        description: "Explore software development, game programming, cybersecurity, and data science."
+      },
+      creative: {
+        name: "Creative Arts & Design",
+        description: "Explore graphic design, animation, game art, writing, and filmmaking."
+      },
+      science: {
+        name: "Science & Research",
+        description: "Explore scientific research, environmental science, laboratory work, and engineering."
+      },
+      business: {
+        name: "Business & Leadership",
+        description: "Explore entrepreneurship, marketing, project management, and business analysis."
+      }
+    };
+
+    let currentQuestion = 0;
+    let answers = [];
+
+    const questionNumber = document.getElementById("questionNumber");
+    const questionTitle = document.getElementById("questionTitle");
+    const questionHint = document.getElementById("questionHint");
+    const optionsGrid = document.getElementById("optionsGrid");
+    const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
+    const nextButton = document.getElementById("nextButton");
+    const backButton = document.getElementById("backButton");
+    const quizError = document.getElementById("quizError");
+
+    function renderQuestion() {
+      const question = questions[currentQuestion];
+
+      questionNumber.textContent =
+        `QUESTION ${String(currentQuestion + 1).padStart(2, "0")}`;
+
+      questionTitle.textContent = question.title;
+      questionHint.textContent = question.hint;
+      progressText.textContent =
+        `Question ${currentQuestion + 1} of ${questions.length}`;
+
+      progressFill.style.width =
+        `${((currentQuestion + 1) / questions.length) * 100}%`;
+
+      backButton.disabled = currentQuestion === 0;
+      nextButton.textContent =
+        currentQuestion === questions.length - 1
+          ? "See my results →"
+          : "Continue →";
+
+      quizError.classList.add("hidden");
+      optionsGrid.replaceChildren();
+
+      question.options.forEach(option => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "option";
+
+        if (answers[currentQuestion] === option.field) {
+          button.classList.add("selected");
+          button.setAttribute("aria-pressed", "true");
+        } else {
+          button.setAttribute("aria-pressed", "false");
+        }
+
+        const symbol = document.createElement("span");
+        symbol.className = "option-symbol";
+        symbol.textContent = option.icon;
+
+        const text = document.createElement("span");
+        text.className = "option-text";
+        text.textContent = option.text;
+
+        button.append(symbol, text);
+
+        button.addEventListener("click", () => {
+          answers[currentQuestion] = option.field;
+          renderQuestion();
+        });
+
+        optionsGrid.appendChild(button);
+      });
+    }
+
+    function showResults() {
+      const scores = {
+        technology: 0,
+        creative: 0,
+        science: 0,
+        business: 0
+      };
+
+      answers.forEach(field => {
+        scores[field]++;
+      });
+
+      const ranked = Object.entries(scores)
+        .filter(([, score]) => score > 0)
+        .sort((a, b) => b[1] - a[1]);
+
+      const resultList = document.getElementById("resultList");
+      resultList.replaceChildren();
+
+      ranked.forEach(([field, score]) => {
+        const career = careers[field];
+        const item = document.createElement("article");
+        item.className = "result-item";
+
+        const heading = document.createElement("h3");
+        heading.textContent = career.name;
+
+        const description = document.createElement("p");
+        description.textContent = career.description;
+
+        const match = document.createElement("div");
+        match.className = "match-label";
+        match.textContent =
+          `${score} of ${questions.length} answers point toward this field`;
+
+        item.append(heading, description, match);
+        resultList.appendChild(item);
+      });
+
+      document.getElementById("quizArea").classList.add("hidden");
+      document.getElementById("resultsArea").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    nextButton.addEventListener("click", () => {
+      if (!answers[currentQuestion]) {
+        quizError.textContent = "Please choose an answer before continuing.";
+        quizError.classList.remove("hidden");
+        return;
+      }
+
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    backButton.addEventListener("click", () => {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        renderQuestion();
+      }
+    });
+
+    document.getElementById("restartButton").addEventListener("click", () => {
+      currentQuestion = 0;
+      answers = [];
+
+      document.getElementById("resultsArea").classList.add("hidden");
+      document.getElementById("quizArea").classList.remove("hidden");
+
+      renderQuestion();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    renderQuestion();
+  </script>
+</body>
+</html>
