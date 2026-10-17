@@ -1,0 +1,1687 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Quiz — CareerQuest</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .quiz-page {
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 65px 24px 100px;
+    }
+
+    .quiz-heading {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .quiz-heading h1 {
+      font: 700 clamp(34px, 5vw, 50px)/1.15 'Space Grotesk', sans-serif;
+      letter-spacing: -1.5px;
+      margin: 16px 0;
+    }
+
+    .quiz-heading p {
+      color: var(--muted);
+    }
+
+    .progress-track {
+      height: 6px;
+      margin: 25px 0 12px;
+      background: var(--surface-light);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 25%;
+      background: linear-gradient(90deg, #8d78f9, #71c9ed);
+      border-radius: 20px;
+      transition: width .3s;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .quiz-card {
+      margin-top: 30px;
+      padding: clamp(22px, 5vw, 38px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: linear-gradient(145deg, #171925, #11121c);
+    }
+
+    .question-number {
+      color: #b9aaff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+
+    .quiz-card h2 {
+      font: 600 clamp(23px, 4vw, 30px) 'Space Grotesk', sans-serif;
+      margin: 12px 0 8px;
+    }
+
+    .question-hint {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 25px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 70px;
+      padding: 15px;
+      color: var(--text);
+      text-align: left;
+      background: #191b29;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: .2s;
+    }
+
+    .option:hover {
+      border-color: #9b87ff;
+      transform: translateY(-2px);
+    }
+
+    .option.selected {
+      background: rgba(139,119,249,.14);
+      border-color: #9b87ff;
+    }
+
+    .option-symbol {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      border-radius: 10px;
+      background: #292442;
+      font-size: 19px;
+    }
+
+    .option-text {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .quiz-controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .back-button {
+      padding: 12px 20px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: transparent;
+      color: white;
+    }
+
+    .back-button:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+
+    .quiz-error {
+      color: #ff9eae;
+      font-size: 13px;
+      margin-top: 14px;
+    }
+
+    .result-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    .result-item {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: #191b29;
+    }
+
+    .result-item h3 {
+      margin-bottom: 5px;
+    }
+
+    .result-item p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .match-label {
+      color: #b9aaff;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 540px) {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quiz-page {
+        padding-top: 40px;
+      }
+    }
+
+/* CareerQuest results redesign */
+.results-card {
+  overflow: hidden;
+}
+
+.results-header {
+  text-align: center;
+  padding: 18px 0 28px;
+}
+
+.results-header .eyebrow {
+  display: inline-block;
+  margin-bottom: 14px;
+  letter-spacing: 2px;
+}
+
+.results-header h2 {
+  font-size: clamp(28px, 5vw, 42px);
+  line-height: 1.15;
+  margin: 8px 0 14px;
+}
+
+.results-header .question-hint {
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.7;
+  opacity: 0.8;
+}
+
+.results-summary {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 18px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(160, 130, 255, 0.28);
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    rgba(130, 90, 255, 0.13),
+    rgba(80, 220, 190, 0.07)
+  );
+}
+
+.summary-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: rgba(150, 120, 255, 0.18);
+  font-size: 27px;
+}
+
+.results-summary h3 {
+  margin: 0 0 5px;
+  font-size: 17px;
+}
+
+.results-summary p {
+  margin: 0;
+  opacity: 0.72;
+  font-size: 14px;
+}
+
+.results-footer {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(150, 150, 180, 0.2);
+}
+
+.results-footer > p {
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+.results-footer .quiz-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.results-footer .quiz-controls > * {
+  min-width: 140px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .results-summary {
+    align-items: flex-start;
+    padding: 14px;
+  }
+
+  .results-footer .quiz-controls {
+    flex-direction: column;
+  }
+
+  .results-footer .quiz-controls > * {
+    width: 100%;
+  }
+}
+
+/* Premium career result cards */
+.result-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  margin-top: 25px;
+}
+
+.result-item {
+  position: relative;
+  padding: 25px;
+  border-radius: 20px;
+  border: 1px solid rgba(160, 130, 255, 0.25);
+  background: linear-gradient(
+    145deg,
+    rgba(120, 90, 200, 0.12),
+    rgba(35, 45, 75, 0.25)
+  );
+  transition: transform 0.25s ease, border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.result-item:hover {
+  transform: translateY(-5px);
+  border-color: rgba(160, 130, 255, 0.7);
+  box-shadow: 0 12px 32px rgba(100, 70, 200, 0.16);
+}
+
+.result-item h3 {
+  margin: 0 0 12px;
+  font-size: 21px;
+  line-height: 1.35;
+  letter-spacing: -0.3px;
+}
+
+.result-item p {
+  line-height: 1.75;
+  opacity: 0.82;
+  margin: 0 0 20px;
+}
+
+.match-label {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(80, 220, 190, 0.25);
+  background: rgba(80, 220, 190, 0.09);
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .result-item {
+    padding: 20px;
+  }
+
+  .result-item h3 {
+    font-size: 19px;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">C</span>
+      CareerQuest<span class="dot">.</span>
+    </a>
+    <a href="index.html" class="secondary-button">← Back home</a>
+  </header>
+
+  <main class="quiz-page">
+    <div class="quiz-heading">
+      <span class="eyebrow">YOUR PERSONAL CAREER EXPLORER</span>
+      <h1>Let's discover <span class="gradient-text">your path.</span></h1>
+      <p>Choose what feels right for you. There are no wrong answers.</p>
+    </div>
+
+    <div id="quizArea">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div class="progress-label">
+        <span id="progressText">Question 1 of 4</span>
+        <span>Take your time</span>
+      </div>
+
+      <section class="quiz-card">
+        <div class="question-number" id="questionNumber">QUESTION 01</div>
+        <h2 id="questionTitle"></h2>
+        <p class="question-hint" id="questionHint"></p>
+        <div class="options-grid" id="optionsGrid"></div>
+        <p class="quiz-error hidden" id="quizError" role="alert"></p>
+
+        <div class="quiz-controls">
+          <button class="back-button" id="backButton">← Back</button>
+          <button class="primary-button" id="nextButton">Continue →</button>
+        </div>
+      </section>
+    </div>
+
+
+<section class="quiz-card results-card hidden" id="resultsArea">
+  <div class="results-header">
+    <span class="eyebrow">✦ YOUR CAREER DISCOVERY</span>
+    <h2>Your future has possibilities.</h2>
+    <p class="question-hint">
+      Discover careers that match your interests, explore new paths,
+      and take your next step with confidence.
+    </p>
+  </div>
+
+  <div class="results-summary">
+    <span class="summary-icon">✧</span>
+    <div>
+      <h3>Your personal career matches</h3>
+      <p>Based on your answers and interests</p>
+    </div>
+  </div>
+
+  <div class="result-list" id="resultList"></div>
+
+  <div class="results-footer">
+    <p>✨ Remember: your interests can grow as you do.</p>
+    <div class="quiz-controls">
+      <button class="back-button" id="restartButton">
+        ↻ Start again
+      </button>
+      <a href="index.html" class="primary-button">
+        Back home →
+      </a>
+    </div>
+  </div>
+</section>
+
+
+  <script>
+  
+const questions = [
+
+  {
+    title: "What do you enjoy doing most?",
+    hint: "Choose the activity you like most.",
+    options: [
+      { text: "Solving difficult problems", icon: "🧩", field: "technology" },
+      { text: "Making art or stories", icon: "🎨", field: "creative" },
+      { text: "Discovering how things work", icon: "🔬", field: "science" },
+      { text: "Leading and organising", icon: "🚀", field: "business" },
+      { text: "Playing sports or training", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which school activity sounds best?",
+    hint: "Think about what makes you curious.",
+    options: [
+      { text: "Building a computer project", icon: "💻", field: "technology" },
+      { text: "Drawing a poster", icon: "🖌️", field: "creative" },
+      { text: "Doing a science experiment", icon: "🧪", field: "science" },
+      { text: "Planning a school event", icon: "📋", field: "business" },
+      { text: "Taking part in a sports match", icon: "🏆", field: "physical" }
+    ]
+  },
+  {
+    title: "Which problem would you like to solve?",
+    hint: "Pick the problem that interests you.",
+    options: [
+      { text: "Fixing a computer program", icon: "⌨️", field: "technology" },
+      { text: "Designing a better logo", icon: "✏️", field: "creative" },
+      { text: "Finding a scientific discovery", icon: "🔭", field: "science" },
+      { text: "Helping a company grow", icon: "📈", field: "business" },
+      { text: "Improving an athlete's performance", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which tool would you most like to use?",
+    hint: "Imagine trying something new.",
+    options: [
+      { text: "A coding editor", icon: "💻", field: "technology" },
+      { text: "A digital drawing tablet", icon: "🖊️", field: "creative" },
+      { text: "A laboratory microscope", icon: "🔬", field: "science" },
+      { text: "A business planning board", icon: "🗂️", field: "business" },
+      { text: "Sports training equipment", icon: "🏋️", field: "physical" }
+    ]
+  },
+  {
+    title: "What would you like to create?",
+    hint: "Choose something you would enjoy making.",
+    options: [
+      { text: "A useful mobile app", icon: "📱", field: "technology" },
+      { text: "A comic or animated film", icon: "🎬", field: "creative" },
+      { text: "A new scientific model", icon: "🧬", field: "science" },
+      { text: "A successful company", icon: "🏢", field: "business" },
+      { text: "A new fitness training plan", icon: "💪", field: "physical" }
+    ]
+  },
+  {
+    title: "Which topic would you explore for hours?",
+    hint: "Think about what holds your attention.",
+    options: [
+      { text: "Robots and computers", icon: "🤖", field: "technology" },
+      { text: "Movies and visual design", icon: "🎨", field: "creative" },
+      { text: "Space and nature", icon: "🌌", field: "science" },
+      { text: "Money and companies", icon: "💰", field: "business" },
+      { text: "Sports and human movement", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "What kind of challenge do you prefer?",
+    hint: "Choose the challenge that excites you.",
+    options: [
+      { text: "Finding a technical solution", icon: "🧠", field: "technology" },
+      { text: "Making something original", icon: "🌈", field: "creative" },
+      { text: "Testing a theory", icon: "🧪", field: "science" },
+      { text: "Reaching a business goal", icon: "🎯", field: "business" },
+      { text: "Beating a personal fitness record", icon: "🏅", field: "physical" }
+    ]
+  },
+  {
+    title: "Which team role suits you?",
+    hint: "Imagine working with other people.",
+    options: [
+      { text: "The person who builds the system", icon: "⚙️", field: "technology" },
+      { text: "The person with creative ideas", icon: "💡", field: "creative" },
+      { text: "The person who researches facts", icon: "🔍", field: "science" },
+      { text: "The person who manages the plan", icon: "📊", field: "business" },
+      { text: "The person who coaches the team", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which result would make you proud?",
+    hint: "Think about the achievement you value.",
+    options: [
+      { text: "An app people love using", icon: "📲", field: "technology" },
+      { text: "Artwork people admire", icon: "🖼️", field: "creative" },
+      { text: "A discovery that teaches us more", icon: "🌍", field: "science" },
+      { text: "A business that succeeds", icon: "🏆", field: "business" },
+      { text: "Winning a sports competition", icon: "🥇", field: "physical" }
+    ]
+  },
+  {
+    title: "Which workplace sounds interesting?",
+    hint: "Imagine where you might enjoy working.",
+    options: [
+      { text: "A technology company", icon: "🖥️", field: "technology" },
+      { text: "A design or film studio", icon: "🎥", field: "creative" },
+      { text: "A research laboratory", icon: "🔬", field: "science" },
+      { text: "A company office", icon: "🏙️", field: "business" },
+      { text: "A stadium or training centre", icon: "🏟️", field: "physical" }
+    ]
+  },
+  {
+    title: "What would you enjoy learning?",
+    hint: "Choose a skill you would like to develop.",
+    options: [
+      { text: "Programming", icon: "👨‍💻", field: "technology" },
+      { text: "Photography", icon: "📷", field: "creative" },
+      { text: "Chemistry", icon: "⚗️", field: "science" },
+      { text: "Marketing", icon: "📣", field: "business" },
+      { text: "Sports coaching", icon: "📋", field: "physical" }
+    ]
+  },
+  {
+    title: "Which project would you choose?",
+    hint: "Imagine choosing your own project.",
+    options: [
+      { text: "Build a simple game", icon: "🎮", field: "technology" },
+      { text: "Create a music video", icon: "🎵", field: "creative" },
+      { text: "Study plants and animals", icon: "🌱", field: "science" },
+      { text: "Launch a small shop", icon: "🛍️", field: "business" },
+      { text: "Organise a sports tournament", icon: "🏆", field: "physical" }
+    ]
+  },
+  {
+    title: "Which subject would you like to investigate?",
+    hint: "Choose what you would like to understand better.",
+    options: [
+      { text: "How computer networks work", icon: "🌐", field: "technology" },
+      { text: "How stories affect people", icon: "📚", field: "creative" },
+      { text: "How the human body works", icon: "🧬", field: "science" },
+      { text: "How people buy products", icon: "🛒", field: "business" },
+      { text: "How athletes build strength", icon: "💪", field: "physical" }
+    ]
+  },
+  {
+    title: "What would you like to improve?",
+    hint: "Choose an ability you would enjoy practising.",
+    options: [
+      { text: "Logical thinking", icon: "🧩", field: "technology" },
+      { text: "Creative expression", icon: "🎨", field: "creative" },
+      { text: "Observation and research", icon: "🔎", field: "science" },
+      { text: "Communication and leadership", icon: "🤝", field: "business" },
+      { text: "Speed and coordination", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which competition sounds exciting?",
+    hint: "Imagine entering a contest.",
+    options: [
+      { text: "A coding competition", icon: "💻", field: "technology" },
+      { text: "An art competition", icon: "🎨", field: "creative" },
+      { text: "A science fair", icon: "🔬", field: "science" },
+      { text: "A business pitch contest", icon: "🎤", field: "business" },
+      { text: "A sports championship", icon: "🏅", field: "physical" }
+    ]
+  },
+  {
+    title: "Which type of thinking do you enjoy?",
+    hint: "Choose how you like to approach tasks.",
+    options: [
+      { text: "Logical and systematic thinking", icon: "⚙️", field: "technology" },
+      { text: "Imaginative and visual thinking", icon: "🌈", field: "creative" },
+      { text: "Evidence-based thinking", icon: "🔬", field: "science" },
+      { text: "Strategic and practical thinking", icon: "♟️", field: "business" },
+      { text: "Tactical thinking during sport", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "What would you most like to design?",
+    hint: "Pick something you would love to plan.",
+    options: [
+      { text: "A computer system", icon: "🖥️", field: "technology" },
+      { text: "A character or costume", icon: "👗", field: "creative" },
+      { text: "A scientific experiment", icon: "🧪", field: "science" },
+      { text: "A product launch", icon: "📦", field: "business" },
+      { text: "A fitness programme", icon: "🏋️", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of achievement interests you?",
+    hint: "Think about the impact you want to make.",
+    options: [
+      { text: "Making technology easier to use", icon: "📱", field: "technology" },
+      { text: "Making people feel through art", icon: "🎭", field: "creative" },
+      { text: "Finding answers to difficult questions", icon: "🔭", field: "science" },
+      { text: "Helping an organisation succeed", icon: "📈", field: "business" },
+      { text: "Helping people become fitter", icon: "💪", field: "physical" }
+    ]
+  },
+  {
+    title: "Which activity would you choose after school?",
+    hint: "Pick the activity you would look forward to.",
+    options: [
+      { text: "Trying a coding challenge", icon: "⌨️", field: "technology" },
+      { text: "Writing or drawing", icon: "✍️", field: "creative" },
+      { text: "Watching a science demonstration", icon: "🧫", field: "science" },
+      { text: "Planning a project with friends", icon: "🗂️", field: "business" },
+      { text: "Playing football or another sport", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which invention would you like to help create?",
+    hint: "Imagine building something useful.",
+    options: [
+      { text: "A helpful robot", icon: "🤖", field: "technology" },
+      { text: "An immersive animated world", icon: "🎬", field: "creative" },
+      { text: "A cleaner energy solution", icon: "🌱", field: "science" },
+      { text: "A service that helps customers", icon: "💼", field: "business" },
+      { text: "Equipment that improves sports training", icon: "🏋️", field: "physical" }
+    ]
+  },
+  {
+    title: "What would you enjoy explaining to others?",
+    hint: "Choose a topic you would enjoy sharing.",
+    options: [
+      { text: "How an app or device works", icon: "📱", field: "technology" },
+      { text: "How to make art or music", icon: "🎨", field: "creative" },
+      { text: "A fascinating fact about nature", icon: "🌿", field: "science" },
+      { text: "How to plan a project", icon: "📊", field: "business" },
+      { text: "How to practise a sport", icon: "🏀", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of progress motivates you?",
+    hint: "Think about what makes you want to keep going.",
+    options: [
+      { text: "A program working correctly", icon: "✅", field: "technology" },
+      { text: "A design looking better", icon: "🖌️", field: "creative" },
+      { text: "An experiment revealing a pattern", icon: "📈", field: "science" },
+      { text: "A project reaching its goal", icon: "🎯", field: "business" },
+      { text: "Getting stronger or faster", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of news would you read first?",
+    hint: "Choose the headline that catches your attention.",
+    options: [
+      { text: "A breakthrough in artificial intelligence", icon: "🤖", field: "technology" },
+      { text: "A new film or game release", icon: "🎮", field: "creative" },
+      { text: "A discovery about space", icon: "🚀", field: "science" },
+      { text: "A new company becoming successful", icon: "📈", field: "business" },
+      { text: "A major sports final", icon: "🏆", field: "physical" }
+    ]
+  },
+  {
+    title: "Which task sounds most satisfying?",
+    hint: "Imagine finishing a difficult task.",
+    options: [
+      { text: "Finding and fixing a software bug", icon: "🐞", field: "technology" },
+      { text: "Finishing an illustration", icon: "🖼️", field: "creative" },
+      { text: "Completing a careful experiment", icon: "🧪", field: "science" },
+      { text: "Negotiating a good agreement", icon: "🤝", field: "business" },
+      { text: "Mastering a difficult sports skill", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which future role sounds most interesting?",
+    hint: "Choose the role you would like to explore.",
+    options: [
+      { text: "Software developer", icon: "💻", field: "technology" },
+      { text: "Graphic designer", icon: "🎨", field: "creative" },
+      { text: "Research scientist", icon: "🔬", field: "science" },
+      { text: "Business manager", icon: "📊", field: "business" },
+      { text: "Sports coach", icon: "🏅", field: "physical" }
+    ]
+  },
+
+  {
+    title: "How would you like to help people?",
+    hint: "Choose the kind of help you would enjoy giving.",
+    options: [
+      { text: "Build useful digital tools", icon: "💻", field: "technology" },
+      { text: "Share ideas through art", icon: "🎨", field: "creative" },
+      { text: "Discover ways to improve health", icon: "🔬", field: "science" },
+      { text: "Help people run projects", icon: "🤝", field: "business" },
+      { text: "Help people improve fitness", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of information do you enjoy?",
+    hint: "Think about what you like to learn from.",
+    options: [
+      { text: "Computer data and code", icon: "🖥️", field: "technology" },
+      { text: "Images and visual stories", icon: "🖼️", field: "creative" },
+      { text: "Facts and experiment results", icon: "🧪", field: "science" },
+      { text: "Sales and market trends", icon: "📊", field: "business" },
+      { text: "Scores and performance records", icon: "🏆", field: "physical" }
+    ]
+  },
+  {
+    title: "What would you like to make easier?",
+    hint: "Choose a problem you would enjoy improving.",
+    options: [
+      { text: "Using computers and apps", icon: "📱", field: "technology" },
+      { text: "Understanding a story or design", icon: "🎭", field: "creative" },
+      { text: "Understanding nature", icon: "🌍", field: "science" },
+      { text: "Managing time and money", icon: "💰", field: "business" },
+      { text: "Learning sports techniques", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which tool would you like to master?",
+    hint: "Imagine practising until you become skilled.",
+    options: [
+      { text: "A programming language", icon: "⌨️", field: "technology" },
+      { text: "A drawing or editing tool", icon: "✏️", field: "creative" },
+      { text: "A scientific instrument", icon: "🔬", field: "science" },
+      { text: "A budgeting spreadsheet", icon: "📈", field: "business" },
+      { text: "Sports or fitness equipment", icon: "🏋️", field: "physical" }
+    ]
+  },
+  {
+    title: "Which result would you like to measure?",
+    hint: "Choose the progress you would enjoy tracking.",
+    options: [
+      { text: "How fast software runs", icon: "⚡", field: "technology" },
+      { text: "How clearly a design communicates", icon: "🎨", field: "creative" },
+      { text: "How accurate an experiment is", icon: "🧪", field: "science" },
+      { text: "How well a business performs", icon: "📊", field: "business" },
+      { text: "How fast or strong an athlete becomes", icon: "💪", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of event would you attend?",
+    hint: "Pick the event you would be excited to visit.",
+    options: [
+      { text: "A technology exhibition", icon: "🤖", field: "technology" },
+      { text: "An art or film festival", icon: "🎬", field: "creative" },
+      { text: "A science exhibition", icon: "🔭", field: "science" },
+      { text: "A business conference", icon: "💼", field: "business" },
+      { text: "A live sports event", icon: "🏟️", field: "physical" }
+    ]
+  },
+  {
+    title: "What would you like to understand deeply?",
+    hint: "Choose a topic you would explore for a long time.",
+    options: [
+      { text: "How artificial intelligence works", icon: "🤖", field: "technology" },
+      { text: "How animation is created", icon: "🎞️", field: "creative" },
+      { text: "How living things evolve", icon: "🧬", field: "science" },
+      { text: "How companies make decisions", icon: "📊", field: "business" },
+      { text: "How the body performs during exercise", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which responsibility sounds enjoyable?",
+    hint: "Imagine being trusted with an important task.",
+    options: [
+      { text: "Keeping a computer system working", icon: "🖥️", field: "technology" },
+      { text: "Creating the look of a project", icon: "🖌️", field: "creative" },
+      { text: "Checking research results", icon: "🔍", field: "science" },
+      { text: "Organising people and resources", icon: "📋", field: "business" },
+      { text: "Planning training sessions", icon: "🏋️", field: "physical" }
+    ]
+  },
+  {
+    title: "Which subject would you like to combine with maths?",
+    hint: "Think about how maths could be used in a career.",
+    options: [
+      { text: "Computing and algorithms", icon: "💻", field: "technology" },
+      { text: "Design and animation", icon: "🎨", field: "creative" },
+      { text: "Physics and research", icon: "🪐", field: "science" },
+      { text: "Finance and economics", icon: "💹", field: "business" },
+      { text: "Sports statistics and performance", icon: "📈", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of product would you like to improve?",
+    hint: "Choose something you would enjoy making better.",
+    options: [
+      { text: "A mobile app", icon: "📱", field: "technology" },
+      { text: "A video game character", icon: "🎮", field: "creative" },
+      { text: "A scientific testing device", icon: "🔬", field: "science" },
+      { text: "A shop or online service", icon: "🛍️", field: "business" },
+      { text: "Sports shoes or training gear", icon: "👟", field: "physical" }
+    ]
+  },
+  {
+    title: "How do you prefer to practise a skill?",
+    hint: "Choose the learning method you enjoy most.",
+    options: [
+      { text: "Building small projects", icon: "🧑‍💻", field: "technology" },
+      { text: "Trying different creative styles", icon: "🎨", field: "creative" },
+      { text: "Testing ideas and recording results", icon: "🧪", field: "science" },
+      { text: "Planning and reviewing goals", icon: "🎯", field: "business" },
+      { text: "Repeating movements and exercises", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of question makes you curious?",
+    hint: "Choose the question you would most like to answer.",
+    options: [
+      { text: "Can this task be automated?", icon: "🤖", field: "technology" },
+      { text: "How can this story be more powerful?", icon: "📖", field: "creative" },
+      { text: "What evidence explains this result?", icon: "🔬", field: "science" },
+      { text: "Why do customers choose this product?", icon: "🛒", field: "business" },
+      { text: "What helps an athlete improve?", icon: "🏅", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of improvement sounds rewarding?",
+    hint: "Imagine seeing the results of your effort.",
+    options: [
+      { text: "Making software more reliable", icon: "🛠️", field: "technology" },
+      { text: "Making a design more appealing", icon: "✨", field: "creative" },
+      { text: "Making a measurement more accurate", icon: "📏", field: "science" },
+      { text: "Making a team more productive", icon: "📊", field: "business" },
+      { text: "Making a movement more efficient", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of professional would you like to meet?",
+    hint: "Choose someone whose work interests you.",
+    options: [
+      { text: "A software engineer", icon: "💻", field: "technology" },
+      { text: "A film director", icon: "🎬", field: "creative" },
+      { text: "A wildlife researcher", icon: "🦁", field: "science" },
+      { text: "An entrepreneur", icon: "🚀", field: "business" },
+      { text: "A professional athlete", icon: "🏆", field: "physical" }
+    ]
+  },
+  {
+    title: "Which activity would you like to lead?",
+    hint: "Think about organising something with others.",
+    options: [
+      { text: "A coding project", icon: "💻", field: "technology" },
+      { text: "A creative production", icon: "🎭", field: "creative" },
+      { text: "A research project", icon: "🔬", field: "science" },
+      { text: "A fundraising or sales campaign", icon: "📣", field: "business" },
+      { text: "A sports team practice", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "What would you most like to study online?",
+    hint: "Choose a course you would be excited to start.",
+    options: [
+      { text: "Web or app development", icon: "🌐", field: "technology" },
+      { text: "Digital art or music", icon: "🎨", field: "creative" },
+      { text: "Astronomy or biology", icon: "🔭", field: "science" },
+      { text: "Entrepreneurship or marketing", icon: "📈", field: "business" },
+      { text: "Exercise science or coaching", icon: "🏋️", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of detail do you notice first?",
+    hint: "Think about what catches your attention.",
+    options: [
+      { text: "A technical error", icon: "🐞", field: "technology" },
+      { text: "A colour or layout choice", icon: "🎨", field: "creative" },
+      { text: "A pattern in nature", icon: "🌿", field: "science" },
+      { text: "A change in prices or demand", icon: "💰", field: "business" },
+      { text: "A movement or playing technique", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which type of work would you like to try?",
+    hint: "Imagine a short work experience placement.",
+    options: [
+      { text: "Testing a website", icon: "🖥️", field: "technology" },
+      { text: "Helping with a photo shoot", icon: "📷", field: "creative" },
+      { text: "Helping in a research lab", icon: "🧪", field: "science" },
+      { text: "Helping a business team", icon: "🤝", field: "business" },
+      { text: "Helping at a sports academy", icon: "🏟️", field: "physical" }
+    ]
+  },
+  {
+    title: "Which challenge would you accept first?",
+    hint: "Choose the task you would be keen to attempt.",
+    options: [
+      { text: "Create a basic website", icon: "🌐", field: "technology" },
+      { text: "Design a book cover", icon: "📚", field: "creative" },
+      { text: "Build a simple science model", icon: "🧬", field: "science" },
+      { text: "Plan a product advertisement", icon: "📣", field: "business" },
+      { text: "Create a warm-up routine", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "What would you like people to remember about your work?",
+    hint: "Think about the quality you want your work to show.",
+    options: [
+      { text: "It was clever and useful", icon: "💡", field: "technology" },
+      { text: "It was original and expressive", icon: "🌈", field: "creative" },
+      { text: "It was accurate and informative", icon: "🔬", field: "science" },
+      { text: "It achieved a clear goal", icon: "🎯", field: "business" },
+      { text: "It improved performance", icon: "🏅", field: "physical" }
+    ]
+  },
+  {
+    title: "Which work setting would suit your energy?",
+    hint: "Imagine a normal working day.",
+    options: [
+      { text: "Solving tasks at a computer", icon: "💻", field: "technology" },
+      { text: "Creating in a lively studio", icon: "🎨", field: "creative" },
+      { text: "Investigating in a lab or outdoors", icon: "🌍", field: "science" },
+      { text: "Working with people and plans", icon: "🤝", field: "business" },
+      { text: "Being active on a field or court", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of feedback helps you most?",
+    hint: "Choose the feedback you would find useful.",
+    options: [
+      { text: "A test showing what works", icon: "🧪", field: "technology" },
+      { text: "Suggestions to improve my style", icon: "🖌️", field: "creative" },
+      { text: "Evidence that supports my idea", icon: "📚", field: "science" },
+      { text: "Advice on reaching a goal", icon: "🎯", field: "business" },
+      { text: "Tips to improve my technique", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of change would you like to create?",
+    hint: "Choose the impact you would find meaningful.",
+    options: [
+      { text: "Make digital tools more helpful", icon: "📱", field: "technology" },
+      { text: "Bring new stories to life", icon: "🎬", field: "creative" },
+      { text: "Help explain the natural world", icon: "🌎", field: "science" },
+      { text: "Help organisations grow responsibly", icon: "🌱", field: "business" },
+      { text: "Help people stay active and healthy", icon: "💪", field: "physical" }
+    ]
+  },
+  {
+    title: "Which career skill would you practise first?",
+    hint: "Choose a skill you would like to try this week.",
+    options: [
+      { text: "Writing a small program", icon: "⌨️", field: "technology" },
+      { text: "Creating a digital illustration", icon: "🖼️", field: "creative" },
+      { text: "Recording an experiment", icon: "🧪", field: "science" },
+      { text: "Making a simple business plan", icon: "📋", field: "business" },
+      { text: "Learning a new sports drill", icon: "⚽", field: "physical" }
+    ]
+  },
+
+  {
+    title: "Which task would you enjoy doing on a computer?",
+    hint: "Choose the task that sounds most interesting.",
+    options: [
+      { text: "Writing code to solve a problem", icon: "💻", field: "technology" },
+      { text: "Editing images or videos", icon: "🎨", field: "creative" },
+      { text: "Analysing scientific data", icon: "🔬", field: "science" },
+      { text: "Preparing a business report", icon: "📊", field: "business" },
+      { text: "Studying sports performance", icon: "🏅", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of goal would motivate you?",
+    hint: "Think about what makes you excited to improve.",
+    options: [
+      { text: "Building a useful digital tool", icon: "📱", field: "technology" },
+      { text: "Creating an impressive artwork", icon: "🖼️", field: "creative" },
+      { text: "Answering a difficult research question", icon: "🧪", field: "science" },
+      { text: "Growing a successful project", icon: "📈", field: "business" },
+      { text: "Improving a personal sports record", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which problem would you investigate?",
+    hint: "Pick the question you would enjoy exploring.",
+    options: [
+      { text: "Why an app keeps crashing", icon: "🐞", field: "technology" },
+      { text: "Why a design attracts attention", icon: "🎨", field: "creative" },
+      { text: "Why a plant grows differently", icon: "🌱", field: "science" },
+      { text: "Why customers choose a product", icon: "🛒", field: "business" },
+      { text: "Why an athlete gets tired", icon: "💪", field: "physical" }
+    ]
+  },
+  {
+    title: "Which activity would you enjoy teaching?",
+    hint: "Choose something you might like to teach others.",
+    options: [
+      { text: "Basic programming", icon: "⌨️", field: "technology" },
+      { text: "Drawing or photography", icon: "📷", field: "creative" },
+      { text: "Simple science experiments", icon: "🔬", field: "science" },
+      { text: "Planning and organising", icon: "📋", field: "business" },
+      { text: "A sport or fitness exercise", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of project would you enjoy researching?",
+    hint: "Imagine spending time learning before you begin.",
+    options: [
+      { text: "A new software feature", icon: "💻", field: "technology" },
+      { text: "A film's visual style", icon: "🎬", field: "creative" },
+      { text: "A space mission", icon: "🚀", field: "science" },
+      { text: "A company's customers", icon: "📊", field: "business" },
+      { text: "An athlete's training routine", icon: "🏋️", field: "physical" }
+    ]
+  },
+  {
+    title: "What would you like to build with a team?",
+    hint: "Choose a shared project you would enjoy.",
+    options: [
+      { text: "A website or mobile app", icon: "🌐", field: "technology" },
+      { text: "An animated short film", icon: "🎞️", field: "creative" },
+      { text: "A science exhibition model", icon: "🧬", field: "science" },
+      { text: "A student-run business", icon: "🏪", field: "business" },
+      { text: "A sports training programme", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of mistake would you want to fix?",
+    hint: "Think about what you would notice and improve.",
+    options: [
+      { text: "A program producing the wrong result", icon: "🐞", field: "technology" },
+      { text: "A layout that looks confusing", icon: "🖌️", field: "creative" },
+      { text: "An experiment with unreliable results", icon: "🧪", field: "science" },
+      { text: "A plan that wastes resources", icon: "📉", field: "business" },
+      { text: "A technique that causes poor performance", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of information would you present?",
+    hint: "Imagine explaining your work to an audience.",
+    options: [
+      { text: "How a new technology works", icon: "🤖", field: "technology" },
+      { text: "The meaning behind an artwork", icon: "🎨", field: "creative" },
+      { text: "The results of a scientific study", icon: "🔬", field: "science" },
+      { text: "A plan for a new business idea", icon: "📈", field: "business" },
+      { text: "An athlete's progress and results", icon: "🏆", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of tool would you invent?",
+    hint: "Choose a tool that could solve a real problem.",
+    options: [
+      { text: "A smarter digital assistant", icon: "🤖", field: "technology" },
+      { text: "A creative design application", icon: "🎨", field: "creative" },
+      { text: "A device for measuring nature", icon: "🔭", field: "science" },
+      { text: "A tool for managing a small business", icon: "📊", field: "business" },
+      { text: "A tool for tracking fitness", icon: "⌚", field: "physical" }
+    ]
+  },
+  {
+    title: "Which type of puzzle would you enjoy?",
+    hint: "Pick the challenge you would try first.",
+    options: [
+      { text: "A logic or coding puzzle", icon: "🧩", field: "technology" },
+      { text: "A visual design challenge", icon: "🖼️", field: "creative" },
+      { text: "A puzzle about scientific patterns", icon: "🔍", field: "science" },
+      { text: "A strategy or planning challenge", icon: "♟️", field: "business" },
+      { text: "A sports tactics challenge", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of customer would you like to help?",
+    hint: "Think about who might benefit from your work.",
+    options: [
+      { text: "People who need better technology", icon: "📱", field: "technology" },
+      { text: "People who need creative content", icon: "🎨", field: "creative" },
+      { text: "People who need scientific information", icon: "📚", field: "science" },
+      { text: "People starting a business", icon: "🚀", field: "business" },
+      { text: "People improving their sports skills", icon: "🏅", field: "physical" }
+    ]
+  },
+  {
+    title: "Which achievement would you celebrate?",
+    hint: "Choose the result that would feel rewarding.",
+    options: [
+      { text: "Launching working software", icon: "🚀", field: "technology" },
+      { text: "Publishing a creative project", icon: "🎬", field: "creative" },
+      { text: "Completing a useful study", icon: "🔬", field: "science" },
+      { text: "Reaching a business target", icon: "🎯", field: "business" },
+      { text: "Winning or completing a sports event", icon: "🏆", field: "physical" }
+    ]
+  },
+  {
+    title: "Which subject would you enjoy combining with art?",
+    hint: "Think about careers that mix different skills.",
+    options: [
+      { text: "Computer graphics", icon: "💻", field: "technology" },
+      { text: "Storytelling and illustration", icon: "📖", field: "creative" },
+      { text: "Scientific diagrams", icon: "🧬", field: "science" },
+      { text: "Advertising and branding", icon: "📣", field: "business" },
+      { text: "Sports photography", icon: "📸", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of data would you like to study?",
+    hint: "Choose the data that interests you most.",
+    options: [
+      { text: "Website or app usage", icon: "📱", field: "technology" },
+      { text: "Audience reactions to media", icon: "🎭", field: "creative" },
+      { text: "Weather or space measurements", icon: "🌦️", field: "science" },
+      { text: "Sales and customer behaviour", icon: "📊", field: "business" },
+      { text: "Fitness and match statistics", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of deadline would motivate you?",
+    hint: "Imagine working toward a clear finish line.",
+    options: [
+      { text: "Getting an app ready to launch", icon: "📲", field: "technology" },
+      { text: "Finishing a film or design", icon: "🎬", field: "creative" },
+      { text: "Completing a research study", icon: "🔬", field: "science" },
+      { text: "Preparing a business proposal", icon: "💼", field: "business" },
+      { text: "Preparing for a competition", icon: "🏅", field: "physical" }
+    ]
+  },
+  {
+    title: "Which type of improvement would you measure?",
+    hint: "Choose a result you would like to track.",
+    options: [
+      { text: "Software speed and reliability", icon: "⚙️", field: "technology" },
+      { text: "Design clarity and appeal", icon: "🎨", field: "creative" },
+      { text: "Accuracy of scientific results", icon: "🧪", field: "science" },
+      { text: "Customer satisfaction and sales", icon: "📈", field: "business" },
+      { text: "Strength, speed, or endurance", icon: "💪", field: "physical" }
+    ]
+  },
+  {
+    title: "Which role would you choose in a new project?",
+    hint: "Pick the part you would like to handle.",
+    options: [
+      { text: "Build the technical system", icon: "🖥️", field: "technology" },
+      { text: "Create the visual identity", icon: "🎨", field: "creative" },
+      { text: "Research the evidence", icon: "🔎", field: "science" },
+      { text: "Manage the budget and schedule", icon: "📋", field: "business" },
+      { text: "Plan the physical activities", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of story would you like to create?",
+    hint: "Choose a story you would enjoy telling.",
+    options: [
+      { text: "A story about future technology", icon: "🤖", field: "technology" },
+      { text: "A character-driven adventure", icon: "📚", field: "creative" },
+      { text: "A documentary about nature", icon: "🌍", field: "science" },
+      { text: "A story about building a company", icon: "🏢", field: "business" },
+      { text: "A story about an athlete's journey", icon: "🏆", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of risk would you like to manage?",
+    hint: "Think about how you would prepare for problems.",
+    options: [
+      { text: "A cybersecurity risk", icon: "🔐", field: "technology" },
+      { text: "A creative project changing direction", icon: "🎨", field: "creative" },
+      { text: "An experiment producing unexpected results", icon: "🧪", field: "science" },
+      { text: "A business spending more than planned", icon: "💰", field: "business" },
+      { text: "An athlete getting injured", icon: "🩹", field: "physical" }
+    ]
+  },
+  {
+    title: "Which environment would you like to explore?",
+    hint: "Choose a place where you would enjoy learning.",
+    options: [
+      { text: "A technology lab", icon: "💻", field: "technology" },
+      { text: "A film or animation studio", icon: "🎞️", field: "creative" },
+      { text: "A nature reserve or laboratory", icon: "🌿", field: "science" },
+      { text: "A startup office", icon: "🚀", field: "business" },
+      { text: "A sports academy", icon: "🏟️", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of question would you ask a professional?",
+    hint: "Imagine meeting someone who does work you admire.",
+    options: [
+      { text: "How do you build reliable software?", icon: "💻", field: "technology" },
+      { text: "How do you develop creative ideas?", icon: "🎨", field: "creative" },
+      { text: "How do you test a scientific theory?", icon: "🔬", field: "science" },
+      { text: "How do you make good business decisions?", icon: "📊", field: "business" },
+      { text: "How do you train for top performance?", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which type of success would inspire you?",
+    hint: "Choose the example that would motivate you.",
+    options: [
+      { text: "A tool used by millions of people", icon: "📱", field: "technology" },
+      { text: "A film loved by its audience", icon: "🎬", field: "creative" },
+      { text: "A discovery that improves knowledge", icon: "🔭", field: "science" },
+      { text: "A company solving a customer problem", icon: "🤝", field: "business" },
+      { text: "An athlete reaching a personal best", icon: "🏅", field: "physical" }
+    ]
+  },
+  {
+    title: "Which task would you like to automate?",
+    hint: "Think about a repeated task that could be easier.",
+    options: [
+      { text: "Sorting files or processing information", icon: "⚙️", field: "technology" },
+      { text: "Organising photos or editing steps", icon: "📷", field: "creative" },
+      { text: "Recording experiment measurements", icon: "🧪", field: "science" },
+      { text: "Tracking orders and payments", icon: "🧾", field: "business" },
+      { text: "Recording training results", icon: "⌚", field: "physical" }
+    ]
+  },
+  {
+    title: "Which skill would you most like to master over time?",
+    hint: "Choose a skill you would enjoy practising for years.",
+    options: [
+      { text: "Advanced programming", icon: "💻", field: "technology" },
+      { text: "Animation or visual design", icon: "🎨", field: "creative" },
+      { text: "Scientific research", icon: "🔬", field: "science" },
+      { text: "Leadership and negotiation", icon: "🤝", field: "business" },
+      { text: "Sports coaching or athletic performance", icon: "🏆", field: "physical" }
+    ]
+  },
+
+  {
+    title: "Which kind of challenge would you enjoy solving for a client?",
+    hint: "Imagine someone asks you for help with a project.",
+    options: [
+      { text: "Build a useful digital solution", icon: "💻", field: "technology" },
+      { text: "Create an engaging visual design", icon: "🎨", field: "creative" },
+      { text: "Investigate a technical or natural problem", icon: "🔬", field: "science" },
+      { text: "Improve a business process", icon: "📊", field: "business" },
+      { text: "Improve a sports training plan", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of workspace would you set up?",
+    hint: "Imagine creating a place for your best work.",
+    options: [
+      { text: "A computer and coding desk", icon: "🖥️", field: "technology" },
+      { text: "An art and design studio", icon: "🖌️", field: "creative" },
+      { text: "A science experiment space", icon: "🧪", field: "science" },
+      { text: "A planning and meeting area", icon: "📋", field: "business" },
+      { text: "A gym or sports practice area", icon: "🏋️", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of question would you research online?",
+    hint: "Pick the question you would search for first.",
+    options: [
+      { text: "How do computer games work?", icon: "🎮", field: "technology" },
+      { text: "How are animated films made?", icon: "🎬", field: "creative" },
+      { text: "How do stars form?", icon: "🌌", field: "science" },
+      { text: "How do new companies find customers?", icon: "📈", field: "business" },
+      { text: "How do athletes improve their stamina?", icon: "💪", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of project would you present to a judge?",
+    hint: "Imagine entering a project competition.",
+    options: [
+      { text: "A working software prototype", icon: "💻", field: "technology" },
+      { text: "An original artwork or film", icon: "🎨", field: "creative" },
+      { text: "A science investigation", icon: "🔬", field: "science" },
+      { text: "A business idea with a plan", icon: "🚀", field: "business" },
+      { text: "A sports performance demonstration", icon: "🏆", field: "physical" }
+    ]
+  },
+  {
+    title: "Which skill would you like to use every day?",
+    hint: "Choose a skill you would enjoy using often.",
+    options: [
+      { text: "Logical problem-solving", icon: "🧩", field: "technology" },
+      { text: "Visual storytelling", icon: "🎨", field: "creative" },
+      { text: "Observation and analysis", icon: "🔍", field: "science" },
+      { text: "Planning and decision-making", icon: "🎯", field: "business" },
+      { text: "Movement and physical training", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of expert would you like to become?",
+    hint: "Think about a subject you would enjoy learning deeply.",
+    options: [
+      { text: "A technology expert", icon: "🤖", field: "technology" },
+      { text: "A creative arts expert", icon: "🎭", field: "creative" },
+      { text: "A science expert", icon: "🔬", field: "science" },
+      { text: "A business expert", icon: "💼", field: "business" },
+      { text: "A sports or fitness expert", icon: "🏅", field: "physical" }
+    ]
+  },
+  {
+    title: "Which task would you enjoy doing independently?",
+    hint: "Imagine working quietly on your own.",
+    options: [
+      { text: "Writing and testing code", icon: "⌨️", field: "technology" },
+      { text: "Drawing or writing a story", icon: "✍️", field: "creative" },
+      { text: "Reading and analysing research", icon: "📚", field: "science" },
+      { text: "Preparing a business strategy", icon: "♟️", field: "business" },
+      { text: "Practising a sports technique", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which task would you enjoy doing with a group?",
+    hint: "Imagine sharing ideas and working together.",
+    options: [
+      { text: "Building a technology project", icon: "💻", field: "technology" },
+      { text: "Producing a creative performance", icon: "🎭", field: "creative" },
+      { text: "Running a group experiment", icon: "🧪", field: "science" },
+      { text: "Planning a business event", icon: "📋", field: "business" },
+      { text: "Playing in a team match", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of progress report would interest you?",
+    hint: "Choose the results you would most like to review.",
+    options: [
+      { text: "Software performance results", icon: "⚙️", field: "technology" },
+      { text: "Audience feedback on a creative work", icon: "🎬", field: "creative" },
+      { text: "Scientific findings and measurements", icon: "🔬", field: "science" },
+      { text: "Revenue and business growth", icon: "📈", field: "business" },
+      { text: "Fitness and match performance", icon: "🏆", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of service would you like to offer?",
+    hint: "Imagine starting a service for other people.",
+    options: [
+      { text: "Website or app development", icon: "🌐", field: "technology" },
+      { text: "Art, photography, or design", icon: "📷", field: "creative" },
+      { text: "Scientific testing or research", icon: "🧪", field: "science" },
+      { text: "Business planning or consulting", icon: "💼", field: "business" },
+      { text: "Fitness coaching or sports training", icon: "🏋️", field: "physical" }
+    ]
+  },
+  {
+    title: "Which new technology would you like to explore?",
+    hint: "Choose a technology that makes you curious.",
+    options: [
+      { text: "Artificial intelligence", icon: "🤖", field: "technology" },
+      { text: "Virtual reality for creative projects", icon: "🥽", field: "creative" },
+      { text: "Scientific scanning equipment", icon: "🔬", field: "science" },
+      { text: "Digital tools for businesses", icon: "📊", field: "business" },
+      { text: "Wearable sports trackers", icon: "⌚", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of written work would you enjoy?",
+    hint: "Think about what you would like to write.",
+    options: [
+      { text: "Technical guides", icon: "💻", field: "technology" },
+      { text: "Stories or scripts", icon: "📖", field: "creative" },
+      { text: "Scientific reports", icon: "🔬", field: "science" },
+      { text: "Business proposals", icon: "📋", field: "business" },
+      { text: "Sports training plans", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of design problem interests you?",
+    hint: "Choose something you would like to improve.",
+    options: [
+      { text: "Making an app easier to use", icon: "📱", field: "technology" },
+      { text: "Making a poster more attractive", icon: "🎨", field: "creative" },
+      { text: "Designing a scientific experiment", icon: "🧪", field: "science" },
+      { text: "Designing a better customer experience", icon: "🛍️", field: "business" },
+      { text: "Designing a more useful sports routine", icon: "🏋️", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of achievement would you like to share publicly?",
+    hint: "Imagine showing others what you have accomplished.",
+    options: [
+      { text: "A program or app I built", icon: "💻", field: "technology" },
+      { text: "An artwork or film I created", icon: "🎨", field: "creative" },
+      { text: "A discovery or research project", icon: "🔬", field: "science" },
+      { text: "A business idea I developed", icon: "🚀", field: "business" },
+      { text: "A sports achievement", icon: "🏆", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of decision would you enjoy making?",
+    hint: "Think about a choice you would like to be responsible for.",
+    options: [
+      { text: "Choosing how software should work", icon: "⚙️", field: "technology" },
+      { text: "Choosing the style of a creative project", icon: "🎨", field: "creative" },
+      { text: "Choosing how to test a theory", icon: "🧪", field: "science" },
+      { text: "Choosing how to use a budget", icon: "💰", field: "business" },
+      { text: "Choosing a team's match strategy", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of information would you collect?",
+    hint: "Choose information you would like to gather.",
+    options: [
+      { text: "Data about how software is used", icon: "📱", field: "technology" },
+      { text: "Feedback on art or media", icon: "🖼️", field: "creative" },
+      { text: "Measurements from experiments", icon: "📏", field: "science" },
+      { text: "Customer and sales information", icon: "📊", field: "business" },
+      { text: "Athlete training and fitness records", icon: "⌚", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of innovation sounds exciting?",
+    hint: "Imagine creating a new way to do something.",
+    options: [
+      { text: "A smarter computer program", icon: "🤖", field: "technology" },
+      { text: "A new form of digital art", icon: "🎨", field: "creative" },
+      { text: "A new way to study nature", icon: "🌿", field: "science" },
+      { text: "A new service for customers", icon: "💡", field: "business" },
+      { text: "A new method of sports training", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which type of organisation would you like to work for?",
+    hint: "Choose an organisation whose work sounds interesting.",
+    options: [
+      { text: "A software or technology company", icon: "💻", field: "technology" },
+      { text: "A film, art, or design studio", icon: "🎬", field: "creative" },
+      { text: "A university or research centre", icon: "🔬", field: "science" },
+      { text: "A company or startup", icon: "🏢", field: "business" },
+      { text: "A sports club or fitness centre", icon: "🏟️", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of project would you like to improve over several months?",
+    hint: "Think about a project you would keep working on.",
+    options: [
+      { text: "A website or software tool", icon: "🌐", field: "technology" },
+      { text: "A film, story, or design portfolio", icon: "🎬", field: "creative" },
+      { text: "A long-term research project", icon: "🔬", field: "science" },
+      { text: "A business or marketing plan", icon: "📈", field: "business" },
+      { text: "A sports or fitness training plan", icon: "🏅", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of work would make you lose track of time?",
+    hint: "Think about an activity you can become absorbed in.",
+    options: [
+      { text: "Solving a coding challenge", icon: "🧩", field: "technology" },
+      { text: "Creating a piece of art", icon: "🎨", field: "creative" },
+      { text: "Exploring a scientific mystery", icon: "🔭", field: "science" },
+      { text: "Planning a project or business", icon: "📋", field: "business" },
+      { text: "Practising or playing a sport", icon: "⚽", field: "physical" }
+    ]
+  },
+  {
+    title: "Which skill would you like to use to solve real-world problems?",
+    hint: "Choose the ability you would enjoy developing.",
+    options: [
+      { text: "Programming and automation", icon: "💻", field: "technology" },
+      { text: "Design and communication", icon: "🎨", field: "creative" },
+      { text: "Research and experimentation", icon: "🔬", field: "science" },
+      { text: "Planning and leadership", icon: "🤝", field: "business" },
+      { text: "Coaching and physical training", icon: "🏃", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of professional challenge would you try first?",
+    hint: "Imagine choosing your first small work assignment.",
+    options: [
+      { text: "Create and test a small app", icon: "📱", field: "technology" },
+      { text: "Design a brand or character", icon: "🖌️", field: "creative" },
+      { text: "Investigate a scientific question", icon: "🧪", field: "science" },
+      { text: "Plan a launch for a new product", icon: "🚀", field: "business" },
+      { text: "Create a training plan for a team", icon: "🏆", field: "physical" }
+    ]
+  },
+  {
+    title: "Which kind of problem would you like to solve using maths?",
+    hint: "Think about where numbers and patterns could help.",
+    options: [
+      { text: "Improve an algorithm", icon: "🧮", field: "technology" },
+      { text: "Plan proportions for a design", icon: "📐", field: "creative" },
+      { text: "Analyse experiment results", icon: "📊", field: "science" },
+      { text: "Compare costs and profits", icon: "💰", field: "business" },
+      { text: "Analyse sports performance", icon: "📈", field: "physical" }
+    ]
+  },
+  {
+    title: "What would you most like to explore next?",
+    hint: "Choose the area you would be excited to try.",
+    options: [
+      { text: "Building digital products", icon: "💻", field: "technology" },
+      { text: "Creating stories and designs", icon: "🎨", field: "creative" },
+      { text: "Discovering how the world works", icon: "🌍", field: "science" },
+      { text: "Building and leading organisations", icon: "🚀", field: "business" },
+      { text: "Sports, movement, and fitness", icon: "⚽", field: "physical" }
+    ]
+  }
+
+];
+
+    const careers = {
+      technology: {
+        name: "Technology & Computing",
+        description: "Explore software development, game programming, cybersecurity, and data science."
+      },
+      creative: {
+        name: "Creative Arts & Design",
+        description: "Explore graphic design, animation, game art, writing, and filmmaking."
+      },
+      science: {
+        name: "Science & Research",
+        description: "Explore scientific research, environmental science, laboratory work, and engineering."
+      },
+      business: {
+        name: "Business & Leadership",
+        description: "Explore entrepreneurship, marketing, project management, and business analysis."
+      },
+      physical: {
+        name: "Physical & Sports",
+        description: "Explore sports, fitness training, coaching, athletics, and physical education."
+      }
+    };
+
+    let currentQuestion = 0;
+    let answers = [];
+
+    const questionNumber = document.getElementById("questionNumber");
+    const questionTitle = document.getElementById("questionTitle");
+    const questionHint = document.getElementById("questionHint");
+    const optionsGrid = document.getElementById("optionsGrid");
+    const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
+    const nextButton = document.getElementById("nextButton");
+    const backButton = document.getElementById("backButton");
+    const quizError = document.getElementById("quizError");
+
+    function renderQuestion() {
+      const question = questions[currentQuestion];
+
+      questionNumber.textContent =
+        `QUESTION ${String(currentQuestion + 1).padStart(2, "0")}`;
+
+      questionTitle.textContent = question.title;
+      questionHint.textContent = question.hint;
+      progressText.textContent =
+        `Question ${currentQuestion + 1} of ${questions.length}`;
+
+      progressFill.style.width =
+        `${((currentQuestion + 1) / questions.length) * 100}%`;
+
+      backButton.disabled = currentQuestion === 0;
+      nextButton.textContent =
+        currentQuestion === questions.length - 1
+          ? "See my results →"
+          : "Continue →";
+
+      quizError.classList.add("hidden");
+      optionsGrid.replaceChildren();
+
+      question.options.forEach(option => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "option";
+
+        if (answers[currentQuestion] === option.field) {
+          button.classList.add("selected");
+          button.setAttribute("aria-pressed", "true");
+        } else {
+          button.setAttribute("aria-pressed", "false");
+        }
+
+        const symbol = document.createElement("span");
+        symbol.className = "option-symbol";
+        symbol.textContent = option.icon;
+
+        const text = document.createElement("span");
+        text.className = "option-text";
+        text.textContent = option.text;
+
+        button.append(symbol, text);
+
+        button.addEventListener("click", () => {
+          answers[currentQuestion] = option.field;
+          renderQuestion();
+        });
+
+        optionsGrid.appendChild(button);
+      });
+    }
+
+    function showResults() {
+      const scores = {
+        technology: 0,
+        creative: 0,
+        science: 0,
+        business: 0,
+        physical: 0,
+      };
+
+      answers.forEach(field => {
+        scores[field]++;
+      });
+
+      const ranked = Object.entries(scores)
+        .filter(([, score]) => score > 0)
+        .sort((a, b) => b[1] - a[1]);
+
+      const resultList = document.getElementById("resultList");
+      resultList.replaceChildren();
+
+      ranked.forEach(([field, score]) => {
+        const career = careers[field];
+        const item = document.createElement("article");
+        item.className = "result-item";
+
+        const heading = document.createElement("h3");
+        heading.textContent = career.name;
+
+        const description = document.createElement("p");
+        description.textContent = career.description;
+
+        const match = document.createElement("div");
+        match.className = "match-label";
+        match.textContent =
+          `${score} of ${questions.length} answers point toward this field`;
+
+        item.append(heading, description, match);
+        resultList.appendChild(item);
+      });
+
+      document.getElementById("quizArea").classList.add("hidden");
+      document.getElementById("resultsArea").classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    nextButton.addEventListener("click", () => {
+      if (!answers[currentQuestion]) {
+        quizError.textContent = "Please choose an answer before continuing.";
+        quizError.classList.remove("hidden");
+        return;
+      }
+
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    backButton.addEventListener("click", () => {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        renderQuestion();
+      }
+    });
+
+    document.getElementById("restartButton").addEventListener("click", () => {
+      currentQuestion = 0;
+      answers = [];
+
+      document.getElementById("resultsArea").classList.add("hidden");
+      document.getElementById("quizArea").classList.remove("hidden");
+
+      renderQuestion();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    renderQuestion();
+  </script>
+</body>
+</html>
